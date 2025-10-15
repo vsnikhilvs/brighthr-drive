@@ -4,6 +4,7 @@ import { describe, it, expect } from 'vitest';
 import { AppThemeProvider } from '../theme';
 import { DocumentViewer } from './DocumentViewer';
 import { ROOT_ITEMS } from '../data';
+import { UI_LABELS } from '../constants';
 
 function renderWithProviders(ui: React.ReactElement) {
 	return render(<AppThemeProvider>{ui}</AppThemeProvider>);
@@ -12,7 +13,7 @@ function renderWithProviders(ui: React.ReactElement) {
 describe('DocumentViewer', () => {
 	it('renders root documents and folders', () => {
 		renderWithProviders(<DocumentViewer rootItems={ROOT_ITEMS} />);
-		expect(screen.getByText('Documents')).toBeInTheDocument();
+		expect(screen.getByText(UI_LABELS.APP_TITLE)).toBeInTheDocument();
 		expect(screen.getByText('Employee Handbook')).toBeInTheDocument();
 		expect(screen.getByText('Expenses')).toBeInTheDocument();
 	});
@@ -28,7 +29,7 @@ describe('DocumentViewer', () => {
 	it('filters by filename', async () => {
 		const user = userEvent.setup();
 		renderWithProviders(<DocumentViewer rootItems={ROOT_ITEMS} />);
-		await user.type(screen.getByLabelText('Filter by name'), 'employee');
+		await user.type(screen.getByLabelText(UI_LABELS.FILTER_BY_NAME), 'employee');
 		expect(screen.getByText('Employee Handbook')).toBeInTheDocument();
 		expect(screen.queryByText('Public Holiday policy')).not.toBeInTheDocument();
 	});

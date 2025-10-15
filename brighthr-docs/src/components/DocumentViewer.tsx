@@ -27,22 +27,23 @@ import ArrowDownwardIcon from '@mui/icons-material/ArrowDownward';
 import ClearIcon from '@mui/icons-material/Clear';
 import SearchIcon from '@mui/icons-material/Search';
 import type { Item, FolderItem, FileItem, SortDirection, SortKey } from '../types';
+import { UI_LABELS, FILE_TYPE_LABELS, SORT_OPTIONS, SORT_DIRECTIONS, DEFAULTS, A11Y_LABELS } from '../constants';
 
 function getIconForFile(file: FileItem) {
-	if (file.type === 'pdf') return <PictureAsPdfIcon color="error" />;
-	if (file.type === 'doc') return <ArticleIcon color="primary" />;
-	if (file.type === 'csv') return <TableChartIcon color="success" />;
-	if (file.type === 'mov') return <MovieIcon color="action" />;
+	if (file.type === FILE_TYPE_LABELS.PDF) return <PictureAsPdfIcon color="error" />;
+	if (file.type === FILE_TYPE_LABELS.DOC) return <ArticleIcon color="primary" />;
+	if (file.type === FILE_TYPE_LABELS.CSV) return <TableChartIcon color="success" />;
+	if (file.type === FILE_TYPE_LABELS.MOV) return <MovieIcon color="action" />;
 	return <DescriptionIcon />;
 }
 
 function isFolder(item: Item): item is FolderItem {
-	return (item as FolderItem).type === 'folder';
+	return (item as FolderItem).type === FILE_TYPE_LABELS.FOLDER;
 }
 
 function compareBy(a: Item, b: Item, key: SortKey, dir: SortDirection): number {
-	const multiplier = dir === 'asc' ? 1 : -1;
-	if (key === 'name') {
+	const multiplier = dir === SORT_DIRECTIONS.ASC ? 1 : -1;
+	if (key === SORT_OPTIONS.NAME) {
 		return a.name.localeCompare(b.name) * multiplier;
 	}
 	// Files have dates, folders do not; folders should group first before sorting by name
@@ -54,8 +55,8 @@ function compareBy(a: Item, b: Item, key: SortKey, dir: SortDirection): number {
 export function DocumentViewer({ rootItems }: { rootItems: Item[] }) {
 	const [path, setPath] = useState<string[]>([]);
 	const [filter, setFilter] = useState('');
-	const [sortKey, setSortKey] = useState<SortKey>('name');
-	const [sortDir, setSortDir] = useState<SortDirection>('asc');
+	const [sortKey, setSortKey] = useState<SortKey>(DEFAULTS.SORT_KEY);
+	const [sortDir, setSortDir] = useState<SortDirection>(DEFAULTS.SORT_DIRECTION);
 
 	const currentItems = useMemo<Item[]>(() => {
 		let items: Item[] = rootItems;
@@ -72,14 +73,14 @@ export function DocumentViewer({ rootItems }: { rootItems: Item[] }) {
 			? currentItems.filter((i) => i.name.toLowerCase().includes(normalizedFilter))
 			: currentItems;
 		// group folders first, then files, each individually sorted
-		const folders = filtered.filter(isFolder).sort((a, b) => compareBy(a, b, 'name', 'asc'));
+		const folders = filtered.filter(isFolder).sort((a, b) => compareBy(a, b, SORT_OPTIONS.NAME, SORT_DIRECTIONS.ASC));
 		const files = filtered
 			.filter((i) => !isFolder(i))
 			.sort((a, b) => compareBy(a, b, sortKey, sortDir));
 		return [...folders, ...files];
 	}, [currentItems, filter, sortKey, sortDir]);
 
-	const breadcrumbs = useMemo(() => ['Home', ...path], [path]);
+	const breadcrumbs = useMemo(() => [UI_LABELS.HOME, ...path], [path]);
 
 	const handleOpenFolder = (folder: FolderItem) => {
 		setPath((prev) => [...prev, folder.name]);
@@ -96,22 +97,22 @@ export function DocumentViewer({ rootItems }: { rootItems: Item[] }) {
 	const toggleSort = (key: SortKey) => {
 		if (sortKey !== key) {
 			setSortKey(key);
-			setSortDir('asc');
+			setSortDir(SORT_DIRECTIONS.ASC);
 			return;
 		}
-		setSortDir((d) => (d === 'asc' ? 'desc' : 'asc'));
+		setSortDir((d) => (d === SORT_DIRECTIONS.ASC ? SORT_DIRECTIONS.DESC : SORT_DIRECTIONS.ASC));
 	};
 
 	return (
 		<Box p={4} display="flex" flexDirection="column" gap={3} flex={1}>
 			<Box display="flex" alignItems="center" gap={2}>
 				<Typography variant="h5" sx={{ color: 'text.primary', fontWeight: 700 }}>
-					BrightHR - Drive
+					{UI_LABELS.APP_TITLE}
 				</Typography>
 			</Box>
 			
 			<Breadcrumbs 
-				aria-label="breadcrumb" 
+				aria-label={A11Y_LABELS.BREADCRUMB} 
 				sx={{ 
 					'& .MuiBreadcrumbs-separator': { 
 						color: 'text.secondary' 
@@ -151,7 +152,7 @@ export function DocumentViewer({ rootItems }: { rootItems: Item[] }) {
 				}}
 			>
 				<TextField
-					label="Filter by name"
+					label={UI_LABELS.FILTER_BY_NAME}
 					value={filter}
 					onChange={(e) => setFilter(e.target.value)}
 					InputProps={{
@@ -163,7 +164,7 @@ export function DocumentViewer({ rootItems }: { rootItems: Item[] }) {
 						endAdornment: filter ? (
 							<InputAdornment position="end">
 								<IconButton 
-									aria-label="clear filter" 
+									aria-label={A11Y_LABELS.CLEAR_FILTER} 
 									onClick={() => setFilter('')}
 									size="small"
 								>
@@ -182,31 +183,31 @@ export function DocumentViewer({ rootItems }: { rootItems: Item[] }) {
 				/>
 				<Box display="flex" gap={1.5} alignItems="center" flexWrap="wrap">
 					<Typography variant="body2" color="text.secondary" sx={{ fontWeight: 500 }}>
-						Sort by:
+						{UI_LABELS.SORT_BY}
 					</Typography>
 					<Chip
-						label="Name"
-						color={sortKey === 'name' ? 'primary' : 'default'}
-						onClick={() => toggleSort('name')}
-						icon={sortKey === 'name' ? (sortDir === 'asc' ? <ArrowUpwardIcon /> : <ArrowDownwardIcon />) : undefined}
-						variant={sortKey === 'name' ? 'filled' : 'outlined'}
+						label={UI_LABELS.SORT_NAME}
+						color={sortKey === SORT_OPTIONS.NAME ? 'primary' : 'default'}
+						onClick={() => toggleSort(SORT_OPTIONS.NAME)}
+						icon={sortKey === SORT_OPTIONS.NAME ? (sortDir === SORT_DIRECTIONS.ASC ? <ArrowUpwardIcon /> : <ArrowDownwardIcon />) : undefined}
+						variant={sortKey === SORT_OPTIONS.NAME ? 'filled' : 'outlined'}
 						size="small"
 						sx={{ 
 							'&:hover': { 
-								backgroundColor: sortKey === 'name' ? 'primary.dark' : 'action.hover' 
+								backgroundColor: sortKey === SORT_OPTIONS.NAME ? 'primary.dark' : 'action.hover' 
 							}
 						}}
 					/>
 					<Chip
-						label="Date"
-						color={sortKey === 'added' ? 'primary' : 'default'}
-						onClick={() => toggleSort('added')}
-						icon={sortKey === 'added' ? (sortDir === 'asc' ? <ArrowUpwardIcon /> : <ArrowDownwardIcon />) : undefined}
-						variant={sortKey === 'added' ? 'filled' : 'outlined'}
+						label={UI_LABELS.SORT_DATE}
+						color={sortKey === SORT_OPTIONS.ADDED ? 'primary' : 'default'}
+						onClick={() => toggleSort(SORT_OPTIONS.ADDED)}
+						icon={sortKey === SORT_OPTIONS.ADDED ? (sortDir === SORT_DIRECTIONS.ASC ? <ArrowUpwardIcon /> : <ArrowDownwardIcon />) : undefined}
+						variant={sortKey === SORT_OPTIONS.ADDED ? 'filled' : 'outlined'}
 						size="small"
 						sx={{ 
 							'&:hover': { 
-								backgroundColor: sortKey === 'added' ? 'primary.dark' : 'action.hover' 
+								backgroundColor: sortKey === SORT_OPTIONS.ADDED ? 'primary.dark' : 'action.hover' 
 							}
 						}}
 					/>
@@ -227,12 +228,25 @@ export function DocumentViewer({ rootItems }: { rootItems: Item[] }) {
 					}
 				}}
 			>
-				<Table aria-label="documents table">
+				<Table aria-label={A11Y_LABELS.DOCUMENTS_TABLE}>
+					<caption style={{ display: 'none' }}>{UI_LABELS.DOCUMENTS}</caption>
 					<TableHead>
 						<TableRow>
-							<TableCell sx={{ fontWeight: 600, color: 'text.primary' }}>Type</TableCell>
-							<TableCell sx={{ fontWeight: 600, color: 'text.primary' }}>Name</TableCell>
-							<TableCell sx={{ fontWeight: 600, color: 'text.primary' }}>Date added</TableCell>
+							<TableCell scope="col" sx={{ fontWeight: 600, color: 'text.primary' }}>{UI_LABELS.TYPE}</TableCell>
+							<TableCell
+								scope="col"
+								sx={{ fontWeight: 600, color: 'text.primary' }}
+								aria-sort={sortKey === SORT_OPTIONS.NAME ? (sortDir === SORT_DIRECTIONS.ASC ? 'ascending' : 'descending') : 'none'}
+							>
+								{UI_LABELS.NAME}
+							</TableCell>
+							<TableCell
+								scope="col"
+								sx={{ fontWeight: 600, color: 'text.primary' }}
+								aria-sort={sortKey === SORT_OPTIONS.ADDED ? (sortDir === SORT_DIRECTIONS.ASC ? 'ascending' : 'descending') : 'none'}
+							>
+								{UI_LABELS.DATE_ADDED}
+							</TableCell>
 						</TableRow>
 					</TableHead>
 					<TableBody>
@@ -248,7 +262,16 @@ export function DocumentViewer({ rootItems }: { rootItems: Item[] }) {
 												backgroundColor: 'action.hover'
 											}
 										}} 
+										role="button"
+										tabIndex={0}
+										aria-label={`Open folder ${item.name}`}
 										onClick={() => handleOpenFolder(item)}
+										onKeyDown={(e) => {
+											if (e.key === 'Enter' || e.key === ' ') {
+												e.preventDefault();
+												handleOpenFolder(item);
+											}
+										}}
 									>
 										<TableCell width={80}>
 											<FolderIcon sx={{ color: 'warning.main', fontSize: 24 }} />
@@ -258,11 +281,11 @@ export function DocumentViewer({ rootItems }: { rootItems: Item[] }) {
 												{item.name}
 											</Typography>
 											<Typography variant="caption" color="text.secondary">
-												Folder
+												{UI_LABELS.FOLDER}
 											</Typography>
 										</TableCell>
 										<TableCell>
-											<Typography variant="body2" color="text.secondary">-</Typography>
+											<Typography variant="body2" color="text.secondary">{DEFAULTS.EMPTY_DATE}</Typography>
 										</TableCell>
 									</TableRow>
 								);
