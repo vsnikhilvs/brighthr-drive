@@ -1,21 +1,20 @@
-import { Paper } from '@mui/material'
+import { Box } from '@mui/material'
 import { DocumentViewer } from './components/DocumentViewer'
 import { ROOT_ITEMS } from './data'
 
 function App() {
   return (
-    <Paper 
-      variant="outlined" 
+    <Box 
       sx={{ 
         minHeight: '100vh',
         minWidth: '100vw',
-        borderRadius: 0,
+        backgroundColor: 'background.default',
         display: 'flex',
         flexDirection: 'column'
       }}
     >
       <DocumentViewer rootItems={ROOT_ITEMS} />
-    </Paper>
+    </Box>
   )
 }
 

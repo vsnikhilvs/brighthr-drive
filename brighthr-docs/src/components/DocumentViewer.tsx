@@ -103,11 +103,21 @@ export function DocumentViewer({ rootItems }: { rootItems: Item[] }) {
 	};
 
 	return (
-		<Box p={3} display="flex" flexDirection="column" gap={2} flex={1}>
-			<Typography variant="h5" fontWeight={600}>
-				BrightHR - Drive
-			</Typography>
-			<Breadcrumbs aria-label="breadcrumb">
+		<Box p={4} display="flex" flexDirection="column" gap={3} flex={1}>
+			<Box display="flex" alignItems="center" gap={2}>
+				<Typography variant="h5" sx={{ color: 'text.primary', fontWeight: 700 }}>
+					BrightHR - Drive
+				</Typography>
+			</Box>
+			
+			<Breadcrumbs 
+				aria-label="breadcrumb" 
+				sx={{ 
+					'& .MuiBreadcrumbs-separator': { 
+						color: 'text.secondary' 
+					} 
+				}}
+			>
 				{breadcrumbs.map((crumb, idx) => (
 					<Link
 						key={crumb + idx}
@@ -115,13 +125,31 @@ export function DocumentViewer({ rootItems }: { rootItems: Item[] }) {
 						variant="body2"
 						underline="hover"
 						onClick={() => handleCrumbClick(idx)}
+						sx={{ 
+							color: idx === breadcrumbs.length - 1 ? 'text.primary' : 'primary.main',
+							fontWeight: idx === breadcrumbs.length - 1 ? 600 : 400,
+							'&:hover': {
+								color: 'primary.dark'
+							}
+						}}
 					>
 						{crumb}
 					</Link>
 				))}
 			</Breadcrumbs>
 
-			<Box display="flex" gap={2} alignItems="center">
+			<Box 
+				display="flex" 
+				gap={3} 
+				alignItems="center" 
+				flexWrap="wrap"
+				sx={{ 
+					backgroundColor: 'background.paper',
+					p: 3,
+					borderRadius: 2,
+					boxShadow: 1
+				}}
+			>
 				<TextField
 					label="Filter by name"
 					value={filter}
@@ -129,27 +157,45 @@ export function DocumentViewer({ rootItems }: { rootItems: Item[] }) {
 					InputProps={{
 						startAdornment: (
 							<InputAdornment position="start">
-								<SearchIcon />
+								<SearchIcon color="action" />
 							</InputAdornment>
 						),
 						endAdornment: filter ? (
 							<InputAdornment position="end">
-								<IconButton aria-label="clear filter" onClick={() => setFilter('')}>
-									<ClearIcon />
+								<IconButton 
+									aria-label="clear filter" 
+									onClick={() => setFilter('')}
+									size="small"
+								>
+									<ClearIcon fontSize="small" />
 								</IconButton>
 							</InputAdornment>
 						) : undefined,
 					}}
-					sx={{ maxWidth: 360 }}
+					sx={{ 
+						maxWidth: 400,
+						'& .MuiOutlinedInput-root': {
+							borderRadius: 2
+						}
+					}}
+					size="small"
 				/>
-				<Box display="flex" gap={1} alignItems="center">
-					<Typography variant="body2">Sort by:</Typography>
+				<Box display="flex" gap={1.5} alignItems="center" flexWrap="wrap">
+					<Typography variant="body2" color="text.secondary" sx={{ fontWeight: 500 }}>
+						Sort by:
+					</Typography>
 					<Chip
 						label="Name"
 						color={sortKey === 'name' ? 'primary' : 'default'}
 						onClick={() => toggleSort('name')}
 						icon={sortKey === 'name' ? (sortDir === 'asc' ? <ArrowUpwardIcon /> : <ArrowDownwardIcon />) : undefined}
 						variant={sortKey === 'name' ? 'filled' : 'outlined'}
+						size="small"
+						sx={{ 
+							'&:hover': { 
+								backgroundColor: sortKey === 'name' ? 'primary.dark' : 'action.hover' 
+							}
+						}}
 					/>
 					<Chip
 						label="Date"
@@ -157,46 +203,91 @@ export function DocumentViewer({ rootItems }: { rootItems: Item[] }) {
 						onClick={() => toggleSort('added')}
 						icon={sortKey === 'added' ? (sortDir === 'asc' ? <ArrowUpwardIcon /> : <ArrowDownwardIcon />) : undefined}
 						variant={sortKey === 'added' ? 'filled' : 'outlined'}
+						size="small"
+						sx={{ 
+							'&:hover': { 
+								backgroundColor: sortKey === 'added' ? 'primary.dark' : 'action.hover' 
+							}
+						}}
 					/>
 				</Box>
 			</Box>
 
-			<TableContainer component={Paper} variant="outlined">
-				<Table size="small" aria-label="documents table">
+			<TableContainer 
+				component={Paper} 
+				variant="outlined"
+				sx={{ 
+					borderRadius: 2,
+					overflow: 'hidden',
+					'& .MuiTable-root': {
+						'& .MuiTableCell-root': {
+							borderBottom: '1px solid',
+							borderBottomColor: 'divider',
+						}
+					}
+				}}
+			>
+				<Table aria-label="documents table">
 					<TableHead>
 						<TableRow>
-							<TableCell>Type</TableCell>
-							<TableCell>Name</TableCell>
-							<TableCell>Date added</TableCell>
+							<TableCell sx={{ fontWeight: 600, color: 'text.primary' }}>Type</TableCell>
+							<TableCell sx={{ fontWeight: 600, color: 'text.primary' }}>Name</TableCell>
+							<TableCell sx={{ fontWeight: 600, color: 'text.primary' }}>Date added</TableCell>
 						</TableRow>
 					</TableHead>
 					<TableBody>
 						{visibleItems.map((item) => {
 							if (isFolder(item)) {
 								return (
-									<TableRow key={`folder-${item.name}`} hover sx={{ cursor: 'pointer' }} onClick={() => handleOpenFolder(item)}>
+									<TableRow 
+										key={`folder-${item.name}`} 
+										hover 
+										sx={{ 
+											cursor: 'pointer',
+											'&:hover': {
+												backgroundColor: 'action.hover'
+											}
+										}} 
+										onClick={() => handleOpenFolder(item)}
+									>
 										<TableCell width={80}>
-											<FolderIcon color="warning" />
+											<FolderIcon sx={{ color: 'warning.main', fontSize: 24 }} />
 										</TableCell>
 										<TableCell>
-											<Typography fontWeight={600}>{item.name}</Typography>
+											<Typography fontWeight={600} sx={{ color: 'text.primary' }}>
+												{item.name}
+											</Typography>
 											<Typography variant="caption" color="text.secondary">
 												Folder
 											</Typography>
 										</TableCell>
-										<TableCell>-</TableCell>
+										<TableCell>
+											<Typography variant="body2" color="text.secondary">-</Typography>
+										</TableCell>
 									</TableRow>
 								);
 							}
 							const file = item as FileItem;
 							return (
-								<TableRow key={`file-${file.name}`}>
+								<TableRow 
+									key={`file-${file.name}`}
+									hover
+									sx={{ 
+										'&:hover': {
+											backgroundColor: 'action.hover'
+										}
+									}}
+								>
 									<TableCell width={80}>{getIconForFile(file)}</TableCell>
 									<TableCell>
-										<Typography>{file.name}</Typography>
+										<Typography sx={{ color: 'text.primary' }}>
+											{file.name}
+										</Typography>
 									</TableCell>
 									<TableCell>
-										<Typography>{file.added}</Typography>
+										<Typography variant="body2" color="text.secondary">
+											{file.added}
+										</Typography>
 									</TableCell>
 								</TableRow>
 							);
